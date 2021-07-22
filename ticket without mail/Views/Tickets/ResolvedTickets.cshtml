@@ -1,0 +1,71 @@
+﻿@model IEnumerable<ticket_without_mail.Models.resolvedTickets>
+
+@{
+    ViewBag.Title = "Затворени тикети";
+}
+
+<h2>Затворени тикети:</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            Email адреса
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.problemSubject)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.problemBody)
+        </th>
+        <th>
+            Време на отварање
+        </th>
+        <th>
+            Време на затварање
+        </th>
+        <th>
+            Потребно време
+        </th>
+        <th>
+            IP адреса
+        </th>
+        <th>
+            Тикетот е затворен од:
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (ticket_without_mail.Models.resolvedTickets item in Model)
+    {
+<tr>
+    <td>
+        @Html.DisplayFor(modelItem => item.email)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.problemSubject)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.problemBody)
+    </td>
+    <td>
+        @item.submitTime.ToLocalTime()
+    </td>
+    <td>
+        @item.resolveTime.ToLocalTime()
+    </td>
+    <td>
+        @item.totalTime
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.ipv4)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.resolver)
+    </td>
+    <td>
+        @Html.ActionLink("Детали", "Details", new { id = item.Id })
+    </td>
+</tr>
+    }
+
+</table>

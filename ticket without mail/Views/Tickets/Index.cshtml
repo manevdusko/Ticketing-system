@@ -1,0 +1,53 @@
+﻿@model IEnumerable<ticket_without_mail.Models.Ticket>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Отворени тикети:</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            Email адреса
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.problemSubject)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.problemBody)
+        </th>
+        <th>
+            Време на отварање
+        </th>
+        <th>
+            IP адреса
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (ticket_without_mail.Models.Ticket item in Model) {
+<tr>
+    <td>
+        @Html.DisplayFor(modelItem => item.email)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.problemSubject)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.problemBody)
+    </td>
+    <td>
+        @item.submitTime.ToLocalTime()
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.ipv4)
+    </td>
+    <td>
+        @Html.ActionLink("Детали", "Details", new { id = item.Id }) |
+        @Html.ActionLink("Затвори", "Delete", new { id = item.Id })
+    </td>
+</tr>
+}
+
+</table>
