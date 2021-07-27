@@ -27,6 +27,9 @@
             Потребно време
         </th>
         <th>
+            Забелешка
+        </th>
+        <th>
             IP адреса
         </th>
         <th>
@@ -54,7 +57,10 @@
         @item.resolveTime.ToLocalTime()
     </td>
     <td>
-        @item.totalTime
+        @item.days @item.hours : @item.minutes : @item.seconds
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.note)
     </td>
     <td>
         @Html.DisplayFor(modelItem => item.ipv4)
@@ -62,9 +68,9 @@
     <td>
         @Html.DisplayFor(modelItem => item.resolver)
     </td>
-    <td>
+ @*   <td>
         @Html.ActionLink("Детали", "Details", new { id = item.Id })
-    </td>
+    </td>*@
 </tr>
     }
 

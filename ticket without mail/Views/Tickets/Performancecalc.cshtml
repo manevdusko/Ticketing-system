@@ -1,0 +1,44 @@
+﻿@model ticket_without_mail.Models.PerformanceModel
+@{
+    ViewBag.Title = "Перформанси";
+}
+
+<h2>Ефикасност</h2>
+<h3>Број на проблеми: @Model.brojNaPodneseniTiketi</h3>
+<h3>Број на решени проблеми: @Model.brojNaReseniTiketi</h3>
+<h5>Ефикасност на тимот: @Model.efikasnostVoProcenti %</h5>
+<table style="width:100%">
+    <tr>
+        <th>Емаил</th>
+        <th>Број на решени проблеми</th>
+        <th>Потрошено време</th>
+
+    </tr>
+    
+        @{
+            foreach (ticket_without_mail.Models.Resolver resolver in Model.resolvers)
+            {
+                if(resolver.seconds >= 60)
+                {
+                    resolver.minutes += resolver.seconds / 60;
+                    resolver.seconds = resolver.seconds % 60;
+                }
+                if (resolver.minutes >= 60)
+                {
+                    resolver.hours += resolver.minutes / 60;
+                    resolver.minutes = resolver.minutes % 60;
+                }
+                if (resolver.hours >= 60)
+                {
+                    resolver.days += resolver.hours / 24;
+                    resolver.hours = resolver.hours % 24;
+                }
+            <tr>
+                 <td>@resolver.ime</td>
+                 <td>@resolver.brojNaReseniTiketi</td>
+                <td>@resolver.days @resolver.hours : @resolver.minutes : @resolver.seconds</td>
+            </tr>
+    }
+    }
+
+</table>

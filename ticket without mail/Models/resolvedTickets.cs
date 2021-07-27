@@ -11,12 +11,15 @@ namespace ticket_without_mail.Models
     {
         [Key]
         public int Id { get; set; }
+
         [Required]
         [DisplayName("Вашата e-mail адреса")]
         public string email { get; set; }
+
         [Required]
         [DisplayName("Наслов на проблемот")]
         public string problemSubject { get; set; }
+
         [Required]
         [DisplayName("Опис на проблемот")]
         public string problemBody { get; set; }
@@ -25,18 +28,36 @@ namespace ticket_without_mail.Models
         [DisplayName("Време на отварање")]
         public DateTime submitTime { get; set; }
 
-        [DisplayName("Време на затваорање")]
+        [DisplayName("Време на затварање")]
         public DateTime resolveTime { get; set; }
+
+        [DisplayName("Време на прифаќање")]
+        public DateTime? acceptanceTime { get; set; }
 
         [DisplayName("Проблемот е решен од")]
         public string resolver { get; set; }
 
-        [DisplayName("Потребно време")]
-        public TimeSpan totalTime { get; set; }
+        [DisplayName("Забелешка")]
+        public string note { get; set; }
 
-        public resolvedTickets() { }
-        public resolvedTickets(int id, string email, string problemSubject, string problemBody, DateTime submitTime, DateTime resolveTime, string resolver, string ipv4)
+        [DisplayName("Тип на проблем")]
+        public List<String> problemType { get; set; }
+
+        public int days { get; set; }
+        public int hours { get; set; }
+        public int minutes { get; set; }
+        public int seconds { get; set; }
+
+        public resolvedTickets() 
         {
+            problemType = new List<string>();
+            acceptanceTime = DateTime.UtcNow;
+
+        }
+        public resolvedTickets(int id, string email, string problemSubject, string problemBody, DateTime submitTime, DateTime acceptanceTime, DateTime resolveTime, string resolver, string ipv4)
+        {
+            acceptanceTime = DateTime.UtcNow;
+            problemType = new List<string>();
             this.Id = id;
             this.email = email;
             this.problemSubject = problemSubject;
@@ -44,6 +65,7 @@ namespace ticket_without_mail.Models
             this.submitTime = submitTime;
             this.resolveTime = resolveTime;
             this.resolver = resolver;
+            this.acceptanceTime = acceptanceTime;
             this.ipv4 = ipv4;
         }
     }

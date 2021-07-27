@@ -219,11 +219,43 @@
     <Compile Include="Migrations\202107221214381_totalTime.Designer.cs">
       <DependentUpon>202107221214381_totalTime.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202107231120387_acceptanceTimeAdded.cs" />
+    <Compile Include="Migrations\202107231120387_acceptanceTimeAdded.Designer.cs">
+      <DependentUpon>202107231120387_acceptanceTimeAdded.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202107231132009_hotFix.cs" />
+    <Compile Include="Migrations\202107231132009_hotFix.Designer.cs">
+      <DependentUpon>202107231132009_hotFix.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202107231145183_notes.cs" />
+    <Compile Include="Migrations\202107231145183_notes.Designer.cs">
+      <DependentUpon>202107231145183_notes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202107231211390_ProblemType.cs" />
+    <Compile Include="Migrations\202107231211390_ProblemType.Designer.cs">
+      <DependentUpon>202107231211390_ProblemType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202107270704446_usedTime.cs" />
+    <Compile Include="Migrations\202107270704446_usedTime.Designer.cs">
+      <DependentUpon>202107270704446_usedTime.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202107270812125_das.cs" />
+    <Compile Include="Migrations\202107270812125_das.Designer.cs">
+      <DependentUpon>202107270812125_das.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202107270918461_fgdjgoidjsiofdg.cs" />
+    <Compile Include="Migrations\202107270918461_fgdjgoidjsiofdg.Designer.cs">
+      <DependentUpon>202107270918461_fgdjgoidjsiofdg.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\AdditionalModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\PerformanceModel.cs" />
+    <Compile Include="Models\ProblemType.cs" />
     <Compile Include="Models\resolvedTickets.cs" />
+    <Compile Include="Models\Resolver.cs" />
     <Compile Include="Models\Ticket.cs" />
     <Compile Include="Models\TicketContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -291,6 +323,9 @@
     <Content Include="Views\Tickets\Index.cshtml" />
     <Content Include="Views\Tickets\success.cshtml" />
     <Content Include="Views\Tickets\ResolvedTickets.cshtml" />
+    <Content Include="Views\Tickets\Performance.cshtml" />
+    <Content Include="Views\Tickets\Performancecalc.cshtml" />
+    <Content Include="Views\Tickets\Accept.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -338,6 +373,27 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202107221214381_totalTime.resx">
       <DependentUpon>202107221214381_totalTime.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202107231120387_acceptanceTimeAdded.resx">
+      <DependentUpon>202107231120387_acceptanceTimeAdded.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202107231132009_hotFix.resx">
+      <DependentUpon>202107231132009_hotFix.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202107231145183_notes.resx">
+      <DependentUpon>202107231145183_notes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202107231211390_ProblemType.resx">
+      <DependentUpon>202107231211390_ProblemType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202107270704446_usedTime.resx">
+      <DependentUpon>202107270704446_usedTime.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202107270812125_das.resx">
+      <DependentUpon>202107270812125_das.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202107270918461_fgdjgoidjsiofdg.resx">
+      <DependentUpon>202107270918461_fgdjgoidjsiofdg.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

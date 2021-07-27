@@ -1,0 +1,12 @@
+﻿
+@model IEnumerable<ticket_without_mail.Models.resolvedTickets>
+
+<script>
+    function getInputValue() {
+        // Selecting the input element and get its value
+        var inputVal = document.getElementById("mesec").value;
+        window.location = "Performancecalc/" + inputVal;
+    }
+</script>
+<h2>Ефикасност за месец:</h2>
+    <input type="text" id="mesec" /><input type="button" onclick='getInputValue()' value="Барај"/>

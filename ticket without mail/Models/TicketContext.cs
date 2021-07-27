@@ -15,8 +15,8 @@ namespace ticket_without_mail.Models
         {
             return new TicketContext();
         }
-
-        public System.Data.Entity.DbSet<ticket_without_mail.Models.Ticket> Tickets { get; set; }
+        public DbSet<ProblemType> ProblemTypes { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
 
     }
 }

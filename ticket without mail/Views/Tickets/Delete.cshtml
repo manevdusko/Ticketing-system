@@ -1,9 +1,15 @@
-﻿@model ticket_without_mail.Models.Ticket
+﻿@model ticket_without_mail.Models.AdditionalModel
 
 @{
     ViewBag.Title = "Затвори тикет";
 }
-
+<script>
+    function getInputValue() {
+        // Selecting the input element and get its value
+        var inputVal = document.getElementById("sel").value;
+        window.location = "../AddSelection/" + inputVal;
+    }
+</script>
 <h2>Затвори тикет</h2>
 
 <h3>Дали навистина сакате да го затворите овој тикет?</h3>
@@ -15,41 +21,72 @@
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.email)
+            @Html.DisplayFor(model => model.ticket.email)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.problemSubject)
+            @Html.DisplayNameFor(model => model.ticket.problemSubject)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.problemSubject)
+            @Html.DisplayFor(model => model.ticket.problemSubject)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.problemBody)
+            @Html.DisplayNameFor(model => model.ticket.problemBody)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.problemBody)
+            @Html.DisplayFor(model => model.ticket.problemBody)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.submitTime)
+            @Html.DisplayNameFor(model => model.ticket.submitTime)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.submitTime)
+            @Html.DisplayFor(model => model.ticket.submitTime)
+        </dd>
+
+        <dt>
+            Време на прифаќање
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.ticket.acceptanceTime)
+        </dd>
+
+        <dt>
+            Тип на проблем
+        </dt>
+        <dd>
+            <select name="tip" id="tip">
+                @{
+                    foreach (ticket_without_mail.Models.ProblemType tip in Model.problemTypes)
+                    {
+                        <option value="@tip.problemName">@tip.problemName</option>
+                    }
+                }
+            </select>
+            <input type="text" id="sel" /><input type="button" value="додај" onclick="getInputValue()" />
+        </dd>
+        <dt>
+            Забелешка:
+        </dt>
+        <dd>
+            <form  method="post">
+                <input type="text" id="qty" name="qty" />
+
         </dd>
 
     </dl>
 
-    @using (Html.BeginForm()) {
+    @using (Html.BeginForm())
+    {
         @Html.AntiForgeryToken()
 
         <div class="form-actions no-color">
             <input type="submit" value="Затвори" class="btn btn-default" /> |
             @Html.ActionLink("Назад", "Index")
         </div>
-    }
+    }</form>
 </div>
