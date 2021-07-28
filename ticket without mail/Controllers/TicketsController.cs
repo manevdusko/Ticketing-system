@@ -17,6 +17,23 @@ namespace ticket_without_mail.Controllers
         [Authorize]
         public ActionResult Index()
         {
+            
+            if(Request.Form["from"] != null && Request.Form["to"] != null)
+            {
+                DateTime from = DateTime.Parse(Request.Form["from"]);
+                DateTime to = DateTime.Parse(Request.Form["to"]);
+                List<Ticket> site = db.Tickets.ToList();
+                List<Ticket> selektirani = new List<Ticket>();
+                foreach (Ticket ticket in site)
+                {
+                    if (ticket.submitTime >= from && ticket.submitTime <= to)
+                    {
+                        selektirani.Add(ticket);
+                    }
+                }
+                return View(selektirani);
+            }
+            
             return View(db.Tickets.ToList());
         }
 
@@ -30,6 +47,7 @@ namespace ticket_without_mail.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
+
         // GET: Tickets/Details/5
         public ActionResult Details(int? id)
         {
@@ -79,15 +97,11 @@ namespace ticket_without_mail.Controllers
                     {
                         Resolver resolver = resolvers.Find(x => x.ime.Equals(ticket.resolver));
                         resolvers.Remove(resolver);
-
                         resolver.brojNaReseniTiketi++;
-
                         resolver.days += ticket.days;
                         resolver.hours += ticket.hours;
                         resolver.minutes += ticket.minutes;
                         resolver.seconds += ticket.seconds;
-
-
                         resolvers.Add(resolver);
 
                     }
@@ -124,6 +138,7 @@ namespace ticket_without_mail.Controllers
 
             return View(performanceModel);
         }
+
         // POST: Tickets/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -156,7 +171,6 @@ namespace ticket_without_mail.Controllers
 
             return View(ticket);
         }
-        
 
         // GET: Tickets/Delete/5
         public ActionResult Delete(int? id)
@@ -176,8 +190,6 @@ namespace ticket_without_mail.Controllers
             return View(additionalModel);
         }
 
-
-
         // resolve ticket
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -186,16 +198,31 @@ namespace ticket_without_mail.Controllers
             Ticket ticket = db.Tickets.Find(id);
             resolvedTickets resolvedTickets = new resolvedTickets(ticket.Id, ticket.email, ticket.problemSubject, ticket.problemBody, ticket.submitTime, (DateTime)ticket.acceptanceTime, DateTime.UtcNow, User.Identity.Name, ticket.ipv4);
             resolvedTickets.acceptanceTime = ticket.acceptanceTime;
-           
-            DateTime at = (DateTime)resolvedTickets.acceptanceTime;
 
-            resolvedTickets.days = DateTime.UtcNow.Subtract(at).Days;
+            int rabotniMinuti = Int32.Parse(Request.Form["raboteno"]);
+            if (rabotniMinuti >= 1440)
+            {
+                resolvedTickets.days = Int32.Parse(Request.Form["raboteno"]) / 1440;
+                rabotniMinuti = resolvedTickets.days % 1440;
 
-            resolvedTickets.minutes = DateTime.UtcNow.Subtract(at).Minutes;
+                resolvedTickets.hours = Int32.Parse(Request.Form["raboteno"]) / 60;
+                rabotniMinuti = resolvedTickets.days % 60;
 
-            resolvedTickets.hours = DateTime.UtcNow.Subtract(at).Hours;
+                resolvedTickets.minutes = rabotniMinuti;
+            }
 
-            resolvedTickets.seconds = DateTime.UtcNow.Subtract(at).Seconds;
+            else if(Int32.Parse(Request.Form["raboteno"]) >= 60)
+            {
+                resolvedTickets.hours = Int32.Parse(Request.Form["raboteno"]) / 60;
+                rabotniMinuti = resolvedTickets.days % 60;
+
+                resolvedTickets.minutes = rabotniMinuti;
+            }
+            else
+            {
+                resolvedTickets.minutes = rabotniMinuti;
+            }
+
             resolvedTickets.note = Request.Form["qty"];
             db.Tickets.Remove(ticket);
             db.resolvedTickets.Add(resolvedTickets);
@@ -224,13 +251,10 @@ namespace ticket_without_mail.Controllers
         {
             Ticket ticket = db.Tickets.Find(id);
             ticket.acceptanceTime = DateTime.UtcNow;
+            ticket.acceptor = User.Identity.Name;
             db.SaveChanges();
             return RedirectToAction("Index");
         }
-
-
-
-
 
         [Authorize]
         public ActionResult ResolvedTickets()

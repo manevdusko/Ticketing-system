@@ -54,7 +54,13 @@
         <dd>
             @Html.DisplayFor(model => model.ticket.acceptanceTime)
         </dd>
-
+        <dt>
+            Време на работа:
+        </dt>
+        <dd>
+            <form method="post">
+                <input type="text" id="raboteno" name="raboteno" /> минути
+        </dd>
         <dt>
             Тип на проблем
         </dt>
@@ -73,7 +79,7 @@
             Забелешка:
         </dt>
         <dd>
-            <form  method="post">
+            
                 <input type="text" id="qty" name="qty" />
 
         </dd>

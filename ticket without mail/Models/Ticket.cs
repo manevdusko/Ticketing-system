@@ -34,7 +34,10 @@ namespace ticket_without_mail.Models
 
         [DisplayName("Време на прифаќање")]
         public DateTime? acceptanceTime { get; set; }
-            
+
+
+        public string acceptor { get; set; }
+
         public string ipv4 { get; set; }
 
         [DisplayName("Време на отварање")]

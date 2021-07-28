@@ -247,6 +247,10 @@
     <Compile Include="Migrations\202107270918461_fgdjgoidjsiofdg.Designer.cs">
       <DependentUpon>202107270918461_fgdjgoidjsiofdg.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202107280624178_acceptorInTicket.cs" />
+    <Compile Include="Migrations\202107280624178_acceptorInTicket.Designer.cs">
+      <DependentUpon>202107280624178_acceptorInTicket.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AdditionalModel.cs" />
@@ -394,6 +398,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202107270918461_fgdjgoidjsiofdg.resx">
       <DependentUpon>202107270918461_fgdjgoidjsiofdg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202107280624178_acceptorInTicket.resx">
+      <DependentUpon>202107280624178_acceptorInTicket.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
