@@ -54,7 +54,7 @@ namespace ticket_without_mail.Models
             acceptanceTime = DateTime.UtcNow;
 
         }
-        public resolvedTickets(int id, string email, string problemSubject, string problemBody, DateTime submitTime, DateTime acceptanceTime, DateTime resolveTime, string resolver, string ipv4)
+        public resolvedTickets(int id, string email, string problemSubject, string problemBody, DateTime submitTime, DateTime resolveTime, string resolver, string ipv4)
         {
             acceptanceTime = DateTime.UtcNow;
             problemType = new List<string>();

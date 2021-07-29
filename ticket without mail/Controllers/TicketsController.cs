@@ -17,8 +17,7 @@ namespace ticket_without_mail.Controllers
         [Authorize]
         public ActionResult Index()
         {
-            
-            if(Request.Form["from"] != null && Request.Form["to"] != null)
+            if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
             {
                 DateTime from = DateTime.Parse(Request.Form["from"]);
                 DateTime to = DateTime.Parse(Request.Form["to"]);
@@ -33,7 +32,6 @@ namespace ticket_without_mail.Controllers
                 }
                 return View(selektirani);
             }
-            
             return View(db.Tickets.ToList());
         }
 
@@ -196,7 +194,8 @@ namespace ticket_without_mail.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Ticket ticket = db.Tickets.Find(id);
-            resolvedTickets resolvedTickets = new resolvedTickets(ticket.Id, ticket.email, ticket.problemSubject, ticket.problemBody, ticket.submitTime, (DateTime)ticket.acceptanceTime, DateTime.UtcNow, User.Identity.Name, ticket.ipv4);
+            resolvedTickets resolvedTickets = new resolvedTickets(ticket.Id, ticket.email, ticket.problemSubject, ticket.problemBody, ticket.submitTime, DateTime.UtcNow, User.Identity.Name, ticket.ipv4);
+            if(ticket.acceptanceTime != null)
             resolvedTickets.acceptanceTime = ticket.acceptanceTime;
 
             int rabotniMinuti = Int32.Parse(Request.Form["raboteno"]);
@@ -256,9 +255,28 @@ namespace ticket_without_mail.Controllers
             return RedirectToAction("Index");
         }
 
+
+
+
         [Authorize]
         public ActionResult ResolvedTickets()
         {
+            if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
+            {
+                DateTime from = DateTime.Parse(Request.Form["from"]);
+                DateTime to = DateTime.Parse(Request.Form["to"]);
+                List<resolvedTickets> site = db.resolvedTickets.ToList();
+                List<resolvedTickets> selektirani = new List<resolvedTickets>();
+                foreach (resolvedTickets ticket in site)
+                {
+                    if (ticket.submitTime >= from && ticket.submitTime <= to)
+                    {
+                        selektirani.Add(ticket);
+                    }
+                }
+                return View(selektirani);
+            }
+
             return View(db.resolvedTickets.ToList());
         }
 
