@@ -1,4 +1,4 @@
-﻿@model ticket_without_mail.Models.Ticket
+﻿@model ticket_without_mail.Models.AcceptModel
 
 @{
     ViewBag.Title = "Прифани тикет";
@@ -15,32 +15,45 @@
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.email)
+            @Html.DisplayFor(model => model.ticket.email)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.problemSubject)
+            @Html.DisplayNameFor(model => model.ticket.problemSubject)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.problemSubject)
+            @Html.DisplayFor(model => model.ticket.problemSubject)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.problemBody)
+            @Html.DisplayNameFor(model => model.ticket.problemBody)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.problemBody)
+            @Html.DisplayFor(model => model.ticket.problemBody)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.submitTime)
+            @Html.DisplayNameFor(model => model.ticket.submitTime)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.submitTime)
+            @Html.DisplayFor(model => model.ticket.submitTime)
         </dd>
+        <dt>
+            Прифати како:
+            <form method="post">
+                <select name="res" id="res">
+                    @{
+                        foreach (string email in Model.emails)
+                        {
+                            <option value="@email">@email</option>
+                        }
+                    }
+                </select>
+
+        </dt>
 
     </dl>
 
@@ -52,5 +65,5 @@
             <input type="submit" value="Прифани" class="btn btn-default" /> |
             @Html.ActionLink("Назад", "Index")
         </div>
-    }
+    }</form>
 </div>

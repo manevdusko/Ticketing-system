@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Web.Mvc;
 using ticket_without_mail.Models;
 
@@ -12,6 +13,43 @@ namespace ticket_without_mail.Controllers
     public class TicketsController : Controller
     {
         private TicketContext db = new TicketContext();
+        ///
+
+        [HttpPost]
+        public FileResult ExportToCSVTicket()
+        {
+            List<Ticket> lstStudents = db.Tickets.ToList();
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("email,наслов,опис,време");
+            foreach (Ticket item in lstStudents)
+            {
+                sb.Append(item.email + "," + item.problemSubject + "," + item.problemSubject + "," + item.submitTime);
+                //Append new line character.
+                sb.Append("\r\n");
+            }
+
+            return File(Encoding.ASCII.GetBytes(sb.ToString()), "text/csv", "tiketi.csv");
+        }
+
+        [HttpPost]
+        public FileResult ExportToCSVResolvedTicket()
+        {
+            List<resolvedTickets> lstStudents = db.resolvedTickets.ToList();
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("email,наслов,опис,време на отварање,потребно време,прифатено од");
+            foreach (resolvedTickets item in lstStudents)
+            {
+                sb.Append(item.email + "," + item.problemSubject + "," + item.problemBody + "," + item.submitTime + "," + item.acceptanceTime + "," + item.resolver);
+                //Append new line character.
+                sb.Append("\r\n");
+            }
+
+            return File(Encoding.ASCII.GetBytes(sb.ToString()), "text/csv", "reseni tiketi.csv");
+        }
+
+        ///
 
         // GET: Tickets
         [Authorize]
@@ -180,7 +218,6 @@ namespace ticket_without_mail.Controllers
             AdditionalModel additionalModel = new AdditionalModel();
             additionalModel.ticket = db.Tickets.Find(id);
             additionalModel.problemTypes = db.ProblemTypes.ToList();
-            //Ticket ticket = db.Tickets.Find(id);
             if (additionalModel.ticket == null)
             {
                 return HttpNotFound();
@@ -193,42 +230,69 @@ namespace ticket_without_mail.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
+
+            /*Ticket Model
+             * email = ticket.email
+             * naslov = problemSubject
+             * opis = problemBody
+             * ip adresa = ipv4
+             * tip na problem = problemType
+             * vreme na otvaranje = submitTime
+             * vreme na prifakjanje = acceptanceTime
+             * koj go prifatil problemot = acceptor
+             */
+
+            /*resolvedTickets Model
+             * email = ticket.email
+             * naslov = problemSubject
+             * opis = problemBody
+             * ip adresa = ipv4
+             * tip na problem = problemType
+             * vreme na otvaranje = submitTime
+             * vreme na prifakjanje = acceptanceTime
+             * vreme na zatvaranje = resolveTime
+             * days, hours, minutes = potrebno vreme (taboteno)
+             * koj go prifatil problemot = acceptor
+             * zabeleska = note
+             */
             Ticket ticket = db.Tickets.Find(id);
-            resolvedTickets resolvedTickets = new resolvedTickets(ticket.Id, ticket.email, ticket.problemSubject, ticket.problemBody, ticket.submitTime, DateTime.UtcNow, User.Identity.Name, ticket.ipv4);
+            resolvedTickets resolvedTickets = new resolvedTickets(ticket.Id, ticket.email, ticket.problemSubject, ticket.problemBody, ticket.ipv4, Request.Form["tip"], ticket.submitTime, (DateTime)ticket.acceptanceTime, DateTime.UtcNow, ticket.acceptor, Request.Form["qty"]);
             if(ticket.acceptanceTime != null)
             resolvedTickets.acceptanceTime = ticket.acceptanceTime;
 
-            int rabotniMinuti = Int32.Parse(Request.Form["raboteno"]);
-            if (rabotniMinuti >= 1440)
+
+            int rabotniMinuti = 0;
+            if (Int32.TryParse(Request.Form["raboteno"], out rabotniMinuti))
             {
-                resolvedTickets.days = Int32.Parse(Request.Form["raboteno"]) / 1440;
-                rabotniMinuti = resolvedTickets.days % 1440;
+                if (rabotniMinuti >= 1440)
+                {
+                    resolvedTickets.days = Int32.Parse(Request.Form["raboteno"]) / 1440;
+                    rabotniMinuti = resolvedTickets.days % 1440;
 
-                resolvedTickets.hours = Int32.Parse(Request.Form["raboteno"]) / 60;
-                rabotniMinuti = resolvedTickets.days % 60;
+                    resolvedTickets.hours = Int32.Parse(Request.Form["raboteno"]) / 60;
+                    rabotniMinuti = resolvedTickets.days % 60;
 
-                resolvedTickets.minutes = rabotniMinuti;
+                    resolvedTickets.minutes = rabotniMinuti;
+                }
+
+                else if (Int32.Parse(Request.Form["raboteno"]) >= 60)
+                {
+                    resolvedTickets.hours = Int32.Parse(Request.Form["raboteno"]) / 60;
+                    rabotniMinuti = resolvedTickets.days % 60;
+
+                    resolvedTickets.minutes = rabotniMinuti;
+                }
+                else
+                {
+                    resolvedTickets.minutes = rabotniMinuti;
+                }
             }
-
-            else if(Int32.Parse(Request.Form["raboteno"]) >= 60)
-            {
-                resolvedTickets.hours = Int32.Parse(Request.Form["raboteno"]) / 60;
-                rabotniMinuti = resolvedTickets.days % 60;
-
-                resolvedTickets.minutes = rabotniMinuti;
-            }
-            else
-            {
-                resolvedTickets.minutes = rabotniMinuti;
-            }
-
-            resolvedTickets.note = Request.Form["qty"];
             db.Tickets.Remove(ticket);
             db.resolvedTickets.Add(resolvedTickets);
             db.SaveChanges();
             return RedirectToAction("Index");
         }
-
+        private ApplicationDbContext applicationDbContext = new ApplicationDbContext();
         public ActionResult Accept(int? id)
         {
             if (id == null)
@@ -236,11 +300,21 @@ namespace ticket_without_mail.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Ticket ticket = db.Tickets.Find(id);
+            AcceptModel acceptModel = new AcceptModel();
+            acceptModel.ticket = ticket;
+            List<ApplicationUser> users = applicationDbContext.Users.ToList();
+            List<string> userMails = new List<string>();
+
+            foreach (ApplicationUser applicationUser in users)
+            {
+                userMails.Add(applicationUser.Email);
+            }
+            acceptModel.emails = userMails;
             if (ticket == null)
             {
                 return HttpNotFound();
             }
-            return View(ticket);
+            return View(acceptModel);
         }
 
         // resolve ticket
@@ -250,7 +324,8 @@ namespace ticket_without_mail.Controllers
         {
             Ticket ticket = db.Tickets.Find(id);
             ticket.acceptanceTime = DateTime.UtcNow;
-            ticket.acceptor = User.Identity.Name;
+            //ticket.acceptor = User.Identity.Name;
+            ticket.acceptor = Request.Form["res"];
             db.SaveChanges();
             return RedirectToAction("Index");
         }

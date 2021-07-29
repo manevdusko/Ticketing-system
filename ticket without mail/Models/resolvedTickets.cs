@@ -9,6 +9,35 @@ namespace ticket_without_mail.Models
 {
     public class resolvedTickets
     {
+        /*resolvedTickets Model
+             * email = ticket.email
+             * naslov = problemSubject
+             * opis = problemBody
+             * ip adresa = ipv4
+             * tip na problem = problemType
+             * vreme na otvaranje = submitTime
+             * vreme na prifakjanje = acceptanceTime
+             * vreme na zatvaranje = resolveTime
+             * days, hours, minutes = potrebno vreme (taboteno)
+             * koj go prifatil problemot = acceptor
+             * zabeleska = note
+             */
+
+        public resolvedTickets(int id, string email, string problemSubject, string problemBody, string ipv4, string problemType, DateTime submitTime, DateTime acceptanceTime, DateTime resolveTime, string resolver, string note)
+        { 
+            this.Id = id;
+            this.email = email;
+            this.problemSubject = problemSubject;
+            this.problemBody = problemBody;
+            this.ipv4 = ipv4;
+            this.submitTime = submitTime;
+            this.resolveTime = resolveTime;
+            this.acceptanceTime = acceptanceTime;
+            this.resolveTime = resolveTime;
+            this.resolver = resolver;
+            this.note = note;
+            this.problemType = problemType;
+        }
         [Key]
         public int Id { get; set; }
 
@@ -28,9 +57,6 @@ namespace ticket_without_mail.Models
         [DisplayName("Време на отварање")]
         public DateTime submitTime { get; set; }
 
-        [DisplayName("Време на затварање")]
-        public DateTime resolveTime { get; set; }
-
         [DisplayName("Време на прифаќање")]
         public DateTime? acceptanceTime { get; set; }
 
@@ -41,32 +67,16 @@ namespace ticket_without_mail.Models
         public string note { get; set; }
 
         [DisplayName("Тип на проблем")]
-        public List<String> problemType { get; set; }
+        public string problemType { get; set; }
+
+        [DisplayName("Време на затварање")]
+        public DateTime resolveTime { get; set; }
 
         public int days { get; set; }
         public int hours { get; set; }
         public int minutes { get; set; }
         public int seconds { get; set; }
-
-        public resolvedTickets() 
-        {
-            problemType = new List<string>();
-            acceptanceTime = DateTime.UtcNow;
-
-        }
-        public resolvedTickets(int id, string email, string problemSubject, string problemBody, DateTime submitTime, DateTime resolveTime, string resolver, string ipv4)
-        {
-            acceptanceTime = DateTime.UtcNow;
-            problemType = new List<string>();
-            this.Id = id;
-            this.email = email;
-            this.problemSubject = problemSubject;
-            this.problemBody = problemBody;
-            this.submitTime = submitTime;
-            this.resolveTime = resolveTime;
-            this.resolver = resolver;
-            this.acceptanceTime = acceptanceTime;
-            this.ipv4 = ipv4;
-        }
+        public resolvedTickets() {}
+        
     }
 }

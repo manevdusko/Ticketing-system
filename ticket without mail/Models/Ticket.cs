@@ -11,6 +11,16 @@ namespace ticket_without_mail.Models
 {
     public class Ticket
     {
+        /*Ticket Model
+             * email = ticket.email
+             * naslov = problemSubject
+             * opis = problemBody
+             * ip adresa = ipv4
+             * tip na problem = problemType
+             * vreme na otvaranje = submitTime
+             * vreme na prifakjanje = acceptanceTime
+             * koj go prifatil problemot = acceptor
+             */
         [Key]
         public int Id { get; set; }
 
@@ -26,15 +36,11 @@ namespace ticket_without_mail.Models
         [DisplayName("Опис на проблемот")]
         public string problemBody { get; set; }
 
-        [DisplayName("Забелешка")]
-        public string note { get; set; }
-
         [DisplayName("Тип на проблем")]
         public List<String> problemType{ get; set; }
 
         [DisplayName("Време на прифаќање")]
         public DateTime? acceptanceTime { get; set; }
-
 
         public string acceptor { get; set; }
 
@@ -46,11 +52,6 @@ namespace ticket_without_mail.Models
         public Ticket() {
             problemType = new List<string>();
 
-        }
-        public Ticket(DateTime time)
-        {
-            problemType = new List<string>();
-            submitTime = time;
         }
     }
 }
