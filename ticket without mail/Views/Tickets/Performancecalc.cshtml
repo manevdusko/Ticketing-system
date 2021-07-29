@@ -4,6 +4,13 @@
 }
 
 <h2>Ефикасност</h2>
+<form method="post">
+    <label for="from">Од:</label>
+    <input type="date" id="from" name="from">
+    <label for="to">До:</label>
+    <input type="date" id="to" name="to">
+    <input type="submit" value="прикажи">
+</form>
 <h3>Број на проблеми: @Model.brojNaPodneseniTiketi</h3>
 <h3>Број на решени проблеми: @Model.brojNaReseniTiketi</h3>
 <h5>Ефикасност на тимот: @Model.efikasnostVoProcenti %</h5>

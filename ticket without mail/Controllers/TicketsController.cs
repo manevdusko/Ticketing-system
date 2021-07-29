@@ -21,11 +21,11 @@ namespace ticket_without_mail.Controllers
             List<Ticket> lstStudents = db.Tickets.ToList();
 
             StringBuilder sb = new StringBuilder();
-            sb.Append("email,наслов,опис,време");
+            sb.Append("email,naslov,opis,vreme");
+            sb.Append("\r\n");
             foreach (Ticket item in lstStudents)
             {
                 sb.Append(item.email + "," + item.problemSubject + "," + item.problemSubject + "," + item.submitTime);
-                //Append new line character.
                 sb.Append("\r\n");
             }
 
@@ -38,11 +38,11 @@ namespace ticket_without_mail.Controllers
             List<resolvedTickets> lstStudents = db.resolvedTickets.ToList();
 
             StringBuilder sb = new StringBuilder();
-            sb.Append("email,наслов,опис,време на отварање,потребно време,прифатено од");
+            sb.Append("email,naslov,opis,vreme na otvaranje,potrebno vreme,vreme na zatvaranje,prifateno od");
+            sb.Append("\r\n");
             foreach (resolvedTickets item in lstStudents)
             {
-                sb.Append(item.email + "," + item.problemSubject + "," + item.problemBody + "," + item.submitTime + "," + item.acceptanceTime + "," + item.resolver);
-                //Append new line character.
+                sb.Append(item.email + "," + item.problemSubject + "," + item.problemBody + "," + item.submitTime + "," + item.days + "; "+item.hours+":"+item.minutes+":"+item.seconds + ","+item.resolveTime+"," + item.resolver);
                 sb.Append("\r\n");
             }
 
@@ -110,56 +110,66 @@ namespace ticket_without_mail.Controllers
             return View(db.resolvedTickets.ToList());
         }
 
-        public ActionResult Performancecalc(int id)
+        [Authorize]
+        public ActionResult Performancecalc()
         {
             int brojNaPodneseniTiketi = 0;
             int brojNaReseniTiketi = 0;
             int days=0, hours=0, minutes=0, seconds=0;
             List<Resolver> resolvers = new List<Resolver>();
 
-            foreach (resolvedTickets ticket in db.resolvedTickets.ToList())
+            if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
             {
-                if (ticket.submitTime.Month == id)
-                {
-                    brojNaPodneseniTiketi++;
-                }
-                if (ticket.resolveTime.Month == id)
-                {
-                    days += ticket.days;
-                    hours += ticket.hours;
-                    minutes += ticket.minutes;
-                    seconds += ticket.seconds;
-                    if (resolvers.Find(x => x.ime.Equals(ticket.resolver)) != null)
-                    {
-                        Resolver resolver = resolvers.Find(x => x.ime.Equals(ticket.resolver));
-                        resolvers.Remove(resolver);
-                        resolver.brojNaReseniTiketi++;
-                        resolver.days += ticket.days;
-                        resolver.hours += ticket.hours;
-                        resolver.minutes += ticket.minutes;
-                        resolver.seconds += ticket.seconds;
-                        resolvers.Add(resolver);
+                DateTime from = DateTime.Parse(Request.Form["from"]);
+                DateTime to = DateTime.Parse(Request.Form["to"]);
 
-                    }
-                    else
-                    {
-                        Resolver resolver = new Resolver();
-                        resolver.brojNaReseniTiketi = 1;
-                        resolver.ime = ticket.resolver;
-                        resolver.days += ticket.days;
-                        resolver.hours += ticket.hours;
-                        resolver.minutes += ticket.minutes;
-                        resolver.seconds += ticket.seconds;
-                        resolvers.Add(resolver);
-                    }
-                    brojNaReseniTiketi++;
-                }
-            }
-            foreach (Ticket ticket in db.Tickets.ToList())
-            {
-                if (ticket.submitTime.Month == id)
+                foreach (resolvedTickets ticket in db.resolvedTickets.ToList())
                 {
-                    brojNaPodneseniTiketi++;
+                    //  if (ticket.submitTime.Month == id)
+                    if (ticket.submitTime >= from && ticket.submitTime <= to)
+                    {
+                        brojNaPodneseniTiketi++;
+                    }
+                    // if (ticket.resolveTime.Month == id)
+                    if (ticket.resolveTime >= from && ticket.resolveTime <= to)
+                    {
+                        days += ticket.days;
+                        hours += ticket.hours;
+                        minutes += ticket.minutes;
+                        seconds += ticket.seconds;
+                        if (resolvers.Find(x => x.ime.Equals(ticket.resolver)) != null)
+                        {
+                            Resolver resolver = resolvers.Find(x => x.ime.Equals(ticket.resolver));
+                            resolvers.Remove(resolver);
+                            resolver.brojNaReseniTiketi++;
+                            resolver.days += ticket.days;
+                            resolver.hours += ticket.hours;
+                            resolver.minutes += ticket.minutes;
+                            resolver.seconds += ticket.seconds;
+                            resolvers.Add(resolver);
+
+                        }
+                        else
+                        {
+                            Resolver resolver = new Resolver();
+                            resolver.brojNaReseniTiketi = 1;
+                            resolver.ime = ticket.resolver;
+                            resolver.days += ticket.days;
+                            resolver.hours += ticket.hours;
+                            resolver.minutes += ticket.minutes;
+                            resolver.seconds += ticket.seconds;
+                            resolvers.Add(resolver);
+                        }
+                        brojNaReseniTiketi++;
+                    }
+                }
+                foreach (Ticket ticket in db.Tickets.ToList())
+                {
+                    // if (ticket.submitTime.Month == id)
+                    if (ticket.submitTime >= from && ticket.submitTime <= to)
+                    {
+                        brojNaPodneseniTiketi++;
+                    }
                 }
             }
             PerformanceModel performanceModel = new PerformanceModel();
