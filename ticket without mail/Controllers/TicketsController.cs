@@ -15,10 +15,13 @@ namespace ticket_without_mail.Controllers
         private TicketContext db = new TicketContext();
         private static List<Ticket> selektirani = new List<Ticket>();
         private static List<resolvedTickets> resolvedSelektirani = new List<resolvedTickets>();
+        private ApplicationDbContext applicationDbContext = new ApplicationDbContext();
 
+        //export na otvoreni tiketi
         [HttpPost]
         public FileResult ExportToCSVTicket()
-        {/*Ticket Model
+        {
+            /*Ticket Model
             * email = ticket.email
             * naslov = problemSubject
             * opis = problemBody
@@ -40,6 +43,7 @@ namespace ticket_without_mail.Controllers
             return File(Encoding.ASCII.GetBytes(sb.ToString()), "text/csv", "tiketi.csv");
         }
 
+        //export na zatvoreni tiketi
         [HttpPost]
         public FileResult ExportToCSVResolvedTicket()
         {
@@ -68,7 +72,7 @@ namespace ticket_without_mail.Controllers
             return File(Encoding.ASCII.GetBytes(sb.ToString()), "text/csv", "reseni tiketi.csv");
         }
 
-        // GET: Tickets
+        //otvoreni tiketi
         [Authorize]
         public ActionResult Index()
         {
@@ -96,6 +100,7 @@ namespace ticket_without_mail.Controllers
             }
         }
 
+        //dodavanje na nov tip problem
         public ActionResult AddSelection(string id)
         {
             ProblemType newProblem = new ProblemType();
@@ -107,32 +112,13 @@ namespace ticket_without_mail.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: Tickets/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Ticket ticket = db.Tickets.Find(id);
-            if (ticket == null)
-            {
-                return HttpNotFound();
-            }
-            return View(ticket);
-        }
-
-        // GET: Tickets/Create
+        //forma za kreiranje na problem
         public ActionResult Create()
         {
             return View();
         }
 
-        public ActionResult Performance()
-        {
-            return View(db.resolvedTickets.ToList());
-        }
-
+        //Efikasnost
         [Authorize]
         public ActionResult Performancecalc()
         {
@@ -148,12 +134,10 @@ namespace ticket_without_mail.Controllers
 
                 foreach (resolvedTickets ticket in db.resolvedTickets.ToList())
                 {
-                    //  if (ticket.submitTime.Month == id)
                     if (ticket.submitTime >= from && ticket.submitTime <= to)
                     {
                         brojNaPodneseniTiketi++;
                     }
-                    // if (ticket.resolveTime.Month == id)
                     if (ticket.resolveTime >= from && ticket.resolveTime <= to)
                     {
                         days += ticket.days;
@@ -188,7 +172,6 @@ namespace ticket_without_mail.Controllers
                 }
                 foreach (Ticket ticket in db.Tickets.ToList())
                 {
-                    // if (ticket.submitTime.Month == id)
                     if (ticket.submitTime >= from && ticket.submitTime <= to)
                     {
                         brojNaPodneseniTiketi++;
@@ -208,7 +191,7 @@ namespace ticket_without_mail.Controllers
             return View(performanceModel);
         }
 
-        // POST: Tickets/Create
+        //prijavi problem
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,email,problemSubject,problemBody")] Ticket ticket)
@@ -241,7 +224,7 @@ namespace ticket_without_mail.Controllers
             return View(ticket);
         }
 
-        // GET: Tickets/Delete/5
+        //potvrdi zatvaranje na tiket
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -258,23 +241,11 @@ namespace ticket_without_mail.Controllers
             return View(additionalModel);
         }
 
-        // resolve ticket
+        //zatvori tiket
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-
-            /*Ticket Model
-             * email = ticket.email
-             * naslov = problemSubject
-             * opis = problemBody
-             * ip adresa = ipv4
-             * tip na problem = problemType
-             * vreme na otvaranje = submitTime
-             * vreme na prifakjanje = acceptanceTime
-             * koj go prifatil problemot = acceptor
-             */
-
             /*resolvedTickets Model
              * email = ticket.email
              * naslov = problemSubject
@@ -295,6 +266,7 @@ namespace ticket_without_mail.Controllers
             Debug.WriteLine(Request.Form["tip"]);
 
             int rabotniMinuti = 0;
+
             if (Int32.TryParse(Request.Form["raboteno"], out rabotniMinuti))
             {
                 if (rabotniMinuti >= 1440)
@@ -325,7 +297,8 @@ namespace ticket_without_mail.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
-        private ApplicationDbContext applicationDbContext = new ApplicationDbContext();
+
+        //potvrdi prifakjanje na tiket
         public ActionResult Accept(int? id)
         {
             if (id == null)
@@ -350,7 +323,7 @@ namespace ticket_without_mail.Controllers
             return View(acceptModel);
         }
 
-        // resolve ticket
+        //potvrdeno prifakjanje na tiket
         [HttpPost, ActionName("Accept")]
         [ValidateAntiForgeryToken]
         public ActionResult AcceptConfirmed(int id)
@@ -363,6 +336,7 @@ namespace ticket_without_mail.Controllers
             return RedirectToAction("Index");
         }
 
+        //prikaz na Затворени тикети:
         [Authorize]
         public ActionResult ResolvedTickets()
         {
@@ -385,6 +359,7 @@ namespace ticket_without_mail.Controllers
             return View(resolvedSelektirani);
         }
 
+        //Успешно го пријавивте проблемот. Ви благодариме.
         public ActionResult success()
         {
             return View();
