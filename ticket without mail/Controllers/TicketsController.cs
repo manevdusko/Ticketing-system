@@ -13,19 +13,27 @@ namespace ticket_without_mail.Controllers
     public class TicketsController : Controller
     {
         private TicketContext db = new TicketContext();
-        ///
+        private static List<Ticket> selektirani = new List<Ticket>();
+        private static List<resolvedTickets> resolvedSelektirani = new List<resolvedTickets>();
 
         [HttpPost]
         public FileResult ExportToCSVTicket()
-        {
-            List<Ticket> lstStudents = db.Tickets.ToList();
-
+        {/*Ticket Model
+            * email = ticket.email
+            * naslov = problemSubject
+            * opis = problemBody
+            * ip adresa = ipv4
+            * tip na problem = problemType
+            * vreme na otvaranje = submitTime
+            * vreme na prifakjanje = acceptanceTime
+            * koj go prifatil problemot = acceptor
+            */
             StringBuilder sb = new StringBuilder();
-            sb.Append("email,naslov,opis,vreme");
+            sb.Append("email,naslov,opis,vreme,ip adresa");
             sb.Append("\r\n");
-            foreach (Ticket item in lstStudents)
+            foreach (Ticket item in selektirani)
             {
-                sb.Append(item.email + "," + item.problemSubject + "," + item.problemSubject + "," + item.submitTime);
+                sb.Append(item.email + "," + item.problemSubject + "," + item.problemBody + "," + item.submitTime + "," + item.ipv4);
                 sb.Append("\r\n");
             }
 
@@ -35,21 +43,30 @@ namespace ticket_without_mail.Controllers
         [HttpPost]
         public FileResult ExportToCSVResolvedTicket()
         {
-            List<resolvedTickets> lstStudents = db.resolvedTickets.ToList();
-
+            /*resolvedTickets Model
+         * email = ticket.email
+         * naslov = problemSubject
+         * opis = problemBody
+         * ip adresa = ipv4
+         * tip na problem = problemType
+         * vreme na otvaranje = submitTime
+         * vreme na prifakjanje = acceptanceTime
+         * vreme na zatvaranje = resolveTime
+         * days, hours, minutes = potrebno vreme (taboteno)
+         * koj go prifatil problemot = acceptor
+         * zabeleska = note
+         */
             StringBuilder sb = new StringBuilder();
-            sb.Append("email,naslov,opis,vreme na otvaranje,potrebno vreme,vreme na zatvaranje,prifateno od");
+            sb.Append("email,naslov,opis,vreme na otvaranje,potrebno vreme,vreme na zatvaranje,prifateno od,ip,tip na problem");
             sb.Append("\r\n");
-            foreach (resolvedTickets item in lstStudents)
+            foreach (resolvedTickets item in resolvedSelektirani)
             {
-                sb.Append(item.email + "," + item.problemSubject + "," + item.problemBody + "," + item.submitTime + "," + item.days + "; "+item.hours+":"+item.minutes+":"+item.seconds + ","+item.resolveTime+"," + item.resolver);
+                sb.Append(item.email + "," + item.problemSubject + "," + item.problemBody + "," + item.submitTime + "," + item.days + "; "+item.hours+":"+item.minutes+":"+item.seconds + ","+item.resolveTime+"," + item.resolver + "," + item.ipv4 + "," + item.problemType);
                 sb.Append("\r\n");
             }
 
             return File(Encoding.ASCII.GetBytes(sb.ToString()), "text/csv", "reseni tiketi.csv");
         }
-
-        ///
 
         // GET: Tickets
         [Authorize]
@@ -57,10 +74,11 @@ namespace ticket_without_mail.Controllers
         {
             if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
             {
+                selektirani.Clear();
                 DateTime from = DateTime.Parse(Request.Form["from"]);
                 DateTime to = DateTime.Parse(Request.Form["to"]);
                 List<Ticket> site = db.Tickets.ToList();
-                List<Ticket> selektirani = new List<Ticket>();
+                
                 foreach (Ticket ticket in site)
                 {
                     if (ticket.submitTime >= from && ticket.submitTime <= to)
@@ -70,7 +88,12 @@ namespace ticket_without_mail.Controllers
                 }
                 return View(selektirani);
             }
-            return View(db.Tickets.ToList());
+            else
+            {
+                selektirani.Clear();
+                selektirani = db.Tickets.ToList();
+                return View(selektirani);
+            }
         }
 
         public ActionResult AddSelection(string id)
@@ -266,10 +289,10 @@ namespace ticket_without_mail.Controllers
              * zabeleska = note
              */
             Ticket ticket = db.Tickets.Find(id);
-            resolvedTickets resolvedTickets = new resolvedTickets(ticket.Id, ticket.email, ticket.problemSubject, ticket.problemBody, ticket.ipv4, Request.Form["tip"], ticket.submitTime, (DateTime)ticket.acceptanceTime, DateTime.UtcNow, ticket.acceptor, Request.Form["qty"]);
+            resolvedTickets resolvedTickets = new resolvedTickets(ticket.Id, ticket.email, ticket.problemSubject, ticket.problemBody, ticket.ipv4, Request.Form["tip"], ticket.submitTime, DateTime.UtcNow, ticket.acceptor, Request.Form["qty"]);
             if(ticket.acceptanceTime != null)
             resolvedTickets.acceptanceTime = ticket.acceptanceTime;
-
+            Debug.WriteLine(Request.Form["tip"]);
 
             int rabotniMinuti = 0;
             if (Int32.TryParse(Request.Form["raboteno"], out rabotniMinuti))
@@ -340,9 +363,6 @@ namespace ticket_without_mail.Controllers
             return RedirectToAction("Index");
         }
 
-
-
-
         [Authorize]
         public ActionResult ResolvedTickets()
         {
@@ -351,18 +371,18 @@ namespace ticket_without_mail.Controllers
                 DateTime from = DateTime.Parse(Request.Form["from"]);
                 DateTime to = DateTime.Parse(Request.Form["to"]);
                 List<resolvedTickets> site = db.resolvedTickets.ToList();
-                List<resolvedTickets> selektirani = new List<resolvedTickets>();
+                resolvedSelektirani = new List<resolvedTickets>();
                 foreach (resolvedTickets ticket in site)
                 {
                     if (ticket.submitTime >= from && ticket.submitTime <= to)
                     {
-                        selektirani.Add(ticket);
+                        resolvedSelektirani.Add(ticket);
                     }
                 }
-                return View(selektirani);
+                return View(resolvedSelektirani);
             }
-
-            return View(db.resolvedTickets.ToList());
+            resolvedSelektirani = db.resolvedTickets.ToList();
+            return View(resolvedSelektirani);
         }
 
         public ActionResult success()

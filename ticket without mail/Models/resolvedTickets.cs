@@ -23,7 +23,7 @@ namespace ticket_without_mail.Models
              * zabeleska = note
              */
 
-        public resolvedTickets(int id, string email, string problemSubject, string problemBody, string ipv4, string problemType, DateTime submitTime, DateTime acceptanceTime, DateTime resolveTime, string resolver, string note)
+        public resolvedTickets(int id, string email, string problemSubject, string problemBody, string ipv4, string problemType, DateTime submitTime, DateTime resolveTime, string resolver, string note)
         { 
             this.Id = id;
             this.email = email;
@@ -32,7 +32,6 @@ namespace ticket_without_mail.Models
             this.ipv4 = ipv4;
             this.submitTime = submitTime;
             this.resolveTime = resolveTime;
-            this.acceptanceTime = acceptanceTime;
             this.resolveTime = resolveTime;
             this.resolver = resolver;
             this.note = note;
