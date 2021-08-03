@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Aspose.Email;
+using Aspose.Email.Clients.Pop3;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Mail;
 using System.Net.Sockets;
 using System.Text;
 using System.Web.Mvc;
@@ -16,6 +19,15 @@ namespace ticket_without_mail.Controllers
         private static List<Ticket> selektirani = new List<Ticket>();
         private static List<resolvedTickets> resolvedSelektirani = new List<resolvedTickets>();
         private ApplicationDbContext applicationDbContext = new ApplicationDbContext();
+
+        //mail
+        public ActionResult mails()
+        {
+
+            return View();
+
+        }
+
 
         //export na otvoreni tiketi
         [HttpPost]
@@ -76,6 +88,51 @@ namespace ticket_without_mail.Controllers
         [Authorize]
         public ActionResult Index()
         {
+
+            //mails
+
+
+            string dataDir = " ";
+
+            Pop3Client client = new Pop3Client();
+
+
+            client.Host = "outlook.office365.com";
+            client.Username = "dushkomanev@outlook.com";
+            client.Password = "Pandoraidule1!";
+            client.Port = 995;
+            client.SecurityOptions = Aspose.Email.Clients.SecurityOptions.Auto;
+
+            try
+            {
+                int messageCount = client.GetMessageCount();
+                Debug.WriteLine("Messages count : " + messageCount);
+
+                // Fetch the message by its sequence number and Save the message using its subject as the file name
+                Aspose.Email.MailMessage msg; //= client.FetchMessages()
+                
+                for(int i = 1; i <= messageCount; i++)
+                {
+                    msg = client.FetchMessage(i);
+                    Debug.WriteLine("Nova poraka " + msg.From + " " + msg.Subject + " " + msg.Body);
+                }
+                /*msg.Save(dataDir + "first-message_out.eml", SaveOptions.DefaultEml);*/
+                client.Dispose();
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(Environment.NewLine + ex.Message);
+            }
+            finally
+            {
+                client.Dispose();
+            }
+            
+            Debug.WriteLine(Environment.NewLine + "Downloaded email using POP3. Message saved at " + dataDir + "first-message_out.eml");
+
+
+            //mails
             if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
             {
                 selektirani.Clear();
