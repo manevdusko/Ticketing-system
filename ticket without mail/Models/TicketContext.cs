@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Web;
+﻿using System.Data.Entity;
 
 namespace ticket_without_mail.Models
 {
     public class TicketContext: DbContext
     {
         public DbSet<resolvedTickets> resolvedTickets { get; set; }
-
+  
         public TicketContext() : base("DefaultConnection") { }
         public static TicketContext Create()
         {

@@ -40,7 +40,7 @@ namespace ticket_without_mail.Controllers
                 sb.Append("\r\n");
             }
 
-            return File(Encoding.ASCII.GetBytes(sb.ToString()), "text/csv", "tiketi.csv");
+            return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv", "tiketi.csv");
         }
 
         //export na zatvoreni tiketi
@@ -97,6 +97,86 @@ namespace ticket_without_mail.Controllers
                 selektirani.Clear();
                 selektirani = db.Tickets.ToList();
                 return View(selektirani);
+            }
+        }
+
+        //potvrdeno prifakjanje na tiket\
+        [HttpPost]
+        public ActionResult SiteTiketiConfirmed(int id, FormCollection fc)
+        {
+            Ticket ticket = db.Tickets.Find(id);
+            ticket.acceptanceTime = DateTime.UtcNow;
+          
+            Debug.WriteLine(id + " " + Request.Form["res"]);
+            ticket.acceptor = fc["res"];
+            db.SaveChanges();
+          
+            return RedirectToAction("SiteTiketi");
+        }
+        
+
+        //site tiketi
+        [Authorize]
+        public ActionResult SiteTiketi(int id = -1)
+        {
+            SiteModel selektiranii = new SiteModel();
+
+            List<ApplicationUser> users = applicationDbContext.Users.ToList();
+            List<string> userMails = new List<string>();
+
+            if (id != -1)
+            {
+                Ticket ticket = db.Tickets.Find(id);
+                ticket.acceptanceTime = DateTime.UtcNow;
+                //ticket.acceptor = User.Identity.Name;
+                Debug.WriteLine(Request.Form["testtt"]);
+                Debug.WriteLine(id + " " + Request.Form["res"]);
+                ticket.acceptor = Request.Form["res"];
+                db.SaveChanges();
+                return RedirectToAction("SiteTiketi");
+            }
+            else
+            {
+                foreach (ApplicationUser applicationUser in users)
+                {
+                    userMails.Add(applicationUser.Email);
+                }
+                selektiranii.emails = userMails;
+
+                if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
+                {
+                    DateTime from = DateTime.Parse(Request.Form["from"]);
+                    DateTime to = DateTime.Parse(Request.Form["to"]);
+
+                    SiteModel siteModel = new SiteModel();
+
+                    siteModel.resolvedTickets = db.resolvedTickets.ToList();
+                    siteModel.unresolvedTickets = db.Tickets.ToList();
+
+                    foreach (Ticket ticket in siteModel.unresolvedTickets)
+                    {
+                        if (ticket.submitTime >= from && ticket.submitTime <= to)
+                        {
+                            Debug.WriteLine("DA");
+                            selektiranii.unresolvedTickets.Add(ticket);
+                        }
+                    }
+                    foreach (resolvedTickets ticket in siteModel.resolvedTickets)
+                    {
+                        if (ticket.submitTime >= from && ticket.submitTime <= to)
+                        {
+                            Debug.WriteLine("DA");
+                            selektiranii.resolvedTickets.Add(ticket);
+                        }
+                    }
+                    return View(selektiranii);
+                }
+                else
+                {
+                    selektiranii.unresolvedTickets = db.Tickets.ToList();
+                    selektiranii.resolvedTickets = db.resolvedTickets.ToList();
+                    return View(selektiranii);
+                }
             }
         }
 
@@ -196,6 +276,7 @@ namespace ticket_without_mail.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,email,problemSubject,problemBody")] Ticket ticket)
         {
+            
             string ipv4 = "";
             try
             {
@@ -214,9 +295,10 @@ namespace ticket_without_mail.Controllers
             }
             if (ModelState.IsValid)
             {
+                
                 ticket.ipv4 = ipv4;
                 ticket.submitTime = (DateTime)DateTime.UtcNow;
-                db.Tickets.Add(ticket);
+                db.Tickets.Add(ticket); 
                 db.SaveChanges();
                 return RedirectToAction("success");
             }
@@ -322,6 +404,9 @@ namespace ticket_without_mail.Controllers
             }
             return View(acceptModel);
         }
+
+
+       
 
         //potvrdeno prifakjanje na tiket
         [HttpPost, ActionName("Accept")]

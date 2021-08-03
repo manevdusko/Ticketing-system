@@ -259,6 +259,10 @@
     <Compile Include="Migrations\202107290843549_29.0701.Designer.cs">
       <DependentUpon>202107290843549_29.0701.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202107301321107_feijruijeriojerifje.cs" />
+    <Compile Include="Migrations\202107301321107_feijruijeriojerifje.Designer.cs">
+      <DependentUpon>202107301321107_feijruijeriojerifje.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AcceptModel.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -269,20 +273,27 @@
     <Compile Include="Models\ProblemType.cs" />
     <Compile Include="Models\resolvedTickets.cs" />
     <Compile Include="Models\Resolver.cs" />
+    <Compile Include="Models\SiteModel.cs" />
     <Compile Include="Models\Ticket.cs" />
     <Compile Include="Models\TicketContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="4FKTcu.jpg" />
+    <Content Include="back.jpg" />
+    <Content Include="back.png" />
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="favicon.ico" />
+    <Content Include="finalBack.jpg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="logo.png" />
+    <Content Include="Preview_Ima.jpg" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
@@ -338,6 +349,7 @@
     <Content Include="Views\Tickets\Performance.cshtml" />
     <Content Include="Views\Tickets\Performancecalc.cshtml" />
     <Content Include="Views\Tickets\Accept.cshtml" />
+    <Content Include="Views\Tickets\SiteTiketi.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -415,6 +427,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202107290843549_29.0701.resx">
       <DependentUpon>202107290843549_29.0701.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202107301321107_feijruijeriojerifje.resx">
+      <DependentUpon>202107301321107_feijruijeriojerifje.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

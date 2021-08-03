@@ -7,6 +7,26 @@
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 
+        <style type="text/css">
+            body {
+
+                position: relative;
+                text-align: center;
+                color: white;
+                background-image: url('../../back.png');
+            }
+            select{
+                color: black;
+            }   
+            input{
+                  color: black;
+            }
+            div{
+                text-align: center;
+            }
+        </style>
+   
+
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -17,13 +37,14 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Amphenol", "Create", "Tickets", new { area = "" }, new { @class = "navbar-brand" })
+                <a href="/Tickets/Create"><img src="~/logo.png" style="width:15%; position:absolute; left:0;"/></a>
             </div>
             <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
+                <ul class="nav navbar-nav" style="position: absolute; left: 250px ">
                     <li>@Html.ActionLink("Пријави проблем", "Create", "Tickets")</li>
                     <li>@Html.ActionLink("Отворени тикети", "Index", "Tickets")</li>
                     <li>@Html.ActionLink("Затворени тикети", "ResolvedTickets", "Tickets")</li>
+                    <li>@Html.ActionLink("Сите тикети", "SiteTiketi", "Tickets")</li>
                     <li>@Html.ActionLink("Ефикасност", "Performancecalc", "Tickets")</li>
                 </ul>
                 @Html.Partial("_LoginPartial")
