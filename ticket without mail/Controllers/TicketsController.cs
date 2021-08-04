@@ -1,5 +1,4 @@
-﻿using Aspose.Email;
-using Aspose.Email.Clients;
+﻿using Aspose.Email.Clients;
 using Aspose.Email.Clients.Pop3;
 using Aspose.Email.Clients.Smtp;
 using System;
@@ -7,8 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-/*using System.Net;
-using System.Net.Mail;*/
 using System.Net.Sockets;
 using System.Text;
 using System.Web.Mvc;
@@ -22,15 +19,18 @@ namespace ticket_without_mail.Controllers
         private static List<Ticket> selektirani = new List<Ticket>();
         private static List<resolvedTickets> resolvedSelektirani = new List<resolvedTickets>();
         private ApplicationDbContext applicationDbContext = new ApplicationDbContext();
+       
+        //promenlivi valuti
         private static bool soMail = true;
-        //mail
-        public ActionResult mails()
-        {
 
-            return View();
+        private string POP3host = "outlook.office365.com";
+        private string username = "dushkomanev@outlook.com";
+        private string password = "Pandoraidule1!";
+        private int POP3port = 995;
 
-        }
-
+        private string smtpFrom = "dushkomanev@outlook.com";
+        private string SMTPhost = "smtp.office365.com";
+        private int SMTPport = 587;
 
         //export na otvoreni tiketi
         [HttpPost]
@@ -46,8 +46,9 @@ namespace ticket_without_mail.Controllers
             * vreme na prifakjanje = acceptanceTime
             * koj go prifatil problemot = acceptor
             */
+            
             StringBuilder sb = new StringBuilder();
-            sb.Append("email,naslov,opis,vreme,ip adresa");
+            sb.Append("Ticket Number,Summary,Description,Assigned To,Category,Closed On,Created On,Created By,Due On,Priority,Organization Name,Status,Time Spent,Time To Resolve,Organization Host,Link to Ticket,Потврдете  го Вашиот Е-маил,Име,Презиме,TeamViewer ID,TeamViewer Password");
             sb.Append("\r\n");
             foreach (Ticket item in selektirani)
             {
@@ -94,15 +95,18 @@ namespace ticket_without_mail.Controllers
             if(soMail)
             readMails();
 
+            //proverka dali e selektiran nekoj datum
             if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
             {
+                //isprazni ja listata za prikazuvanje na tiketi
                 selektirani.Clear();
                 DateTime from = DateTime.Parse(Request.Form["from"]);
                 DateTime to = DateTime.Parse(Request.Form["to"]);
+                //site unresolved tickets
                 List<Ticket> site = db.Tickets.ToList();
                 
                 foreach (Ticket ticket in site)
-                {
+                {      //ako tiketot e vo soodvetniot datum
                     if (ticket.submitTime >= from && ticket.submitTime <= to)
                     {
                         selektirani.Add(ticket);
@@ -113,6 +117,7 @@ namespace ticket_without_mail.Controllers
             else
             {
                 selektirani.Clear();
+                //procitaj gi site tiketi od bazata
                 selektirani = db.Tickets.ToList();
                 return View(selektirani);
             }
@@ -122,57 +127,68 @@ namespace ticket_without_mail.Controllers
         [HttpPost]
         public ActionResult SiteTiketiConfirmed(int id, FormCollection fc)
         {
+            //pronajdi go tiketot koj sto e prifaten
             Ticket ticket = db.Tickets.Find(id);
+            //azuriraj go vremeto na prifakjanje
             ticket.acceptanceTime = DateTime.UtcNow;
-          
-            Debug.WriteLine(id + " " + Request.Form["res"]);
+            
+            //azuriraj go selektiraniot acceptor
             ticket.acceptor = fc["res"];
+
+            //zacuvaj gi promenite vo bazata
             db.SaveChanges();
           
             return RedirectToAction("SiteTiketi");
         }
         
+        //akcija za povik na funkcija za citanje na mailovi
         public ActionResult ReadMails()
         {
             readMails();
             return RedirectToAction("SiteTiketi");
         }
 
+        //funkcija za prakanje na mail
         private void sendMail(string to, string title, string body)
         {
-
+            //nova poraka
             Aspose.Email.MailMessage EmailMessage = new Aspose.Email.MailMessage();
-            //Set email message properties which you want to specify
+
+            //popolnuvanje na porakata
             EmailMessage.Subject = title;
             EmailMessage.To = to;
             EmailMessage.Body = body;
-            EmailMessage.From = "dushkomanev@outlook.com";
+            EmailMessage.From = smtpFrom;
 
-            //Initiate an instance of SmptpClient class
+            //Inicijalizacija na smtp klient
             SmtpClient SMTPEmailClient = new SmtpClient();
 
-            //Set SMTP client properties so the email message can get through the server
-            SMTPEmailClient.Host = "smtp.office365.com";
-            SMTPEmailClient.Username = "dushkomanev@outlook.com";
-            SMTPEmailClient.Password = "Pandoraidule1!";
-            SMTPEmailClient.Port = 587;
+            //postavuvanje na postavkite na smtp
+            SMTPEmailClient.Host = SMTPhost;
+            SMTPEmailClient.Username = username;
+            SMTPEmailClient.Password = password;
+            SMTPEmailClient.Port = SMTPport;
             SMTPEmailClient.SecurityOptions = SecurityOptions.SSLExplicit;
 
-            //Finally send the email message using Gmail's SMTP client
+            //prakjanje na mailot
             SMTPEmailClient.Send(EmailMessage);
         }
 
+        //funkcija za citanje na mailovi
         private void readMails()
         {
+            //inicijalizacija na pop3 klient
             Pop3Client client = new Pop3Client();
-
+            
+            //citanje na mailovite od baza
             List<resolvedTickets> resolvedTickets = db.resolvedTickets.ToList();
             List<Ticket> unresolvedTickets = db.Tickets.ToList();
-
-            client.Host = "outlook.office365.com";
-            client.Username = "dushkomanev@outlook.com";
-            client.Password = "Pandoraidule1!";
-            client.Port = 995;
+            
+            //postavki za pop3 klient
+            client.Host = POP3host;
+            client.Username = username;
+            client.Password = password;
+            client.Port = POP3port;
             client.SecurityOptions = Aspose.Email.Clients.SecurityOptions.Auto;
 
             try
@@ -181,15 +197,19 @@ namespace ticket_without_mail.Controllers
                 int messageCount = client.GetMessageCount();
                 Debug.WriteLine("Messages count : " + messageCount);
 
+                //poraka
                 Aspose.Email.MailMessage msg;
 
                 for (int i = 1; i <= messageCount; i++)
                 {
                     Debug.WriteLine("FOR CIKLUS");
+                    //procitaj ja porakata
                     msg = client.FetchMessage(i);
+                    //brisenje na licencata od aspose
                     string subject = msg.Subject.Replace("(Aspose.Email Evaluation)", "").Trim();
                     string body = msg.Body.Replace("------------------------------", "").Replace("(Aspose.Email", "").Replace("Evaluation)", "").Replace("This", "").Replace("is", "").Replace("an", "").Replace("evaluation", "").Replace("copy", "").Replace("of", "").Replace("Aspose.Email", "").Replace("for", "").Replace(".NET", "").Replace("http://www.aspose.com/corporate/purchase/end-user-license-agreement.aspx:", "").Replace("View", "").Replace("EULA", "").Replace("Online", "").Trim();
 
+                    //proverka dali tiketot e veke vo bazata
                     if ((resolvedTickets.Find(ticket => ((ticket.email == msg.From.ToString()) && (ticket.problemSubject == subject) && (ticket.problemBody == body))) != null) || (unresolvedTickets.Find(ticket => ((ticket.email == msg.From.ToString()) && (ticket.problemSubject == subject) && (ticket.problemBody == body))) != null))
                     {
                         Debug.WriteLine("NE DODAVAM TIKET");
@@ -207,7 +227,7 @@ namespace ticket_without_mail.Controllers
                     }
                     Debug.WriteLine("Nova poraka " + msg.From.ToString() + " " + msg.Subject.Replace("(Aspose.Email Evaluation)", "").Trim() + " " + msg.Body.Replace("(Aspose.Email", "").Replace("Evaluation)", "").Replace("This", "").Replace("is", "").Replace("an", "").Replace("evaluation", "").Replace("copy", "").Replace("of", "").Replace("Aspose.Email", "").Replace("for", "").Replace(".NET", "").Replace("http://www.aspose.com/corporate/purchase/end-user-license-agreement.aspx:", "").Replace("View", "").Replace("EULA", "").Replace("Online", "").Trim());
                 }
-                /*msg.Save(dataDir + "first-message_out.eml", SaveOptions.DefaultEml);*/
+                
                 client.Dispose();
 
             }
@@ -227,8 +247,10 @@ namespace ticket_without_mail.Controllers
         {
             SiteModel selektiranii = new SiteModel();
 
+            //registrirani korisnici
             List<ApplicationUser> users = applicationDbContext.Users.ToList();
             List<string> userMails = new List<string>();
+            
             if (soMail)
                 readMails();
 
@@ -236,7 +258,7 @@ namespace ticket_without_mail.Controllers
                 {
                     Ticket ticket = db.Tickets.Find(id);
                     ticket.acceptanceTime = DateTime.UtcNow;
-                    //ticket.acceptor = User.Identity.Name;
+
                     Debug.WriteLine(Request.Form["testtt"]);
                     Debug.WriteLine(id + " " + Request.Form["res"]);
                     ticket.acceptor = Request.Form["res"];
