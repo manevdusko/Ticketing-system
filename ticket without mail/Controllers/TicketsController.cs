@@ -1,11 +1,14 @@
 ﻿using Aspose.Email;
+using Aspose.Email.Clients;
 using Aspose.Email.Clients.Pop3;
+using Aspose.Email.Clients.Smtp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Net.Mail;
+/*using System.Net;
+using System.Net.Mail;*/
 using System.Net.Sockets;
 using System.Text;
 using System.Web.Mvc;
@@ -19,7 +22,7 @@ namespace ticket_without_mail.Controllers
         private static List<Ticket> selektirani = new List<Ticket>();
         private static List<resolvedTickets> resolvedSelektirani = new List<resolvedTickets>();
         private ApplicationDbContext applicationDbContext = new ApplicationDbContext();
-
+        private static bool soMail = true;
         //mail
         public ActionResult mails()
         {
@@ -88,51 +91,9 @@ namespace ticket_without_mail.Controllers
         [Authorize]
         public ActionResult Index()
         {
+            if(soMail)
+            readMails();
 
-            //mails
-
-
-            string dataDir = " ";
-
-            Pop3Client client = new Pop3Client();
-
-
-            client.Host = "outlook.office365.com";
-            client.Username = "dushkomanev@outlook.com";
-            client.Password = "Pandoraidule1!";
-            client.Port = 995;
-            client.SecurityOptions = Aspose.Email.Clients.SecurityOptions.Auto;
-
-            try
-            {
-                int messageCount = client.GetMessageCount();
-                Debug.WriteLine("Messages count : " + messageCount);
-
-                // Fetch the message by its sequence number and Save the message using its subject as the file name
-                Aspose.Email.MailMessage msg; //= client.FetchMessages()
-                
-                for(int i = 1; i <= messageCount; i++)
-                {
-                    msg = client.FetchMessage(i);
-                    Debug.WriteLine("Nova poraka " + msg.From + " " + msg.Subject + " " + msg.Body);
-                }
-                /*msg.Save(dataDir + "first-message_out.eml", SaveOptions.DefaultEml);*/
-                client.Dispose();
-                
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(Environment.NewLine + ex.Message);
-            }
-            finally
-            {
-                client.Dispose();
-            }
-            
-            Debug.WriteLine(Environment.NewLine + "Downloaded email using POP3. Message saved at " + dataDir + "first-message_out.eml");
-
-
-            //mails
             if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
             {
                 selektirani.Clear();
@@ -171,6 +132,94 @@ namespace ticket_without_mail.Controllers
             return RedirectToAction("SiteTiketi");
         }
         
+        public ActionResult ReadMails()
+        {
+            readMails();
+            return RedirectToAction("SiteTiketi");
+        }
+
+        private void sendMail(string to, string title, string body)
+        {
+
+            Aspose.Email.MailMessage EmailMessage = new Aspose.Email.MailMessage();
+            //Set email message properties which you want to specify
+            EmailMessage.Subject = title;
+            EmailMessage.To = to;
+            EmailMessage.Body = body;
+            EmailMessage.From = "dushkomanev@outlook.com";
+
+            //Initiate an instance of SmptpClient class
+            SmtpClient SMTPEmailClient = new SmtpClient();
+
+            //Set SMTP client properties so the email message can get through the server
+            SMTPEmailClient.Host = "smtp.office365.com";
+            SMTPEmailClient.Username = "dushkomanev@outlook.com";
+            SMTPEmailClient.Password = "Pandoraidule1!";
+            SMTPEmailClient.Port = 587;
+            SMTPEmailClient.SecurityOptions = SecurityOptions.SSLExplicit;
+
+            //Finally send the email message using Gmail's SMTP client
+            SMTPEmailClient.Send(EmailMessage);
+        }
+
+        private void readMails()
+        {
+            Pop3Client client = new Pop3Client();
+
+            List<resolvedTickets> resolvedTickets = db.resolvedTickets.ToList();
+            List<Ticket> unresolvedTickets = db.Tickets.ToList();
+
+            client.Host = "outlook.office365.com";
+            client.Username = "dushkomanev@outlook.com";
+            client.Password = "Pandoraidule1!";
+            client.Port = 995;
+            client.SecurityOptions = Aspose.Email.Clients.SecurityOptions.Auto;
+
+            try
+            {
+                Debug.WriteLine("CITAM");
+                int messageCount = client.GetMessageCount();
+                Debug.WriteLine("Messages count : " + messageCount);
+
+                Aspose.Email.MailMessage msg;
+
+                for (int i = 1; i <= messageCount; i++)
+                {
+                    Debug.WriteLine("FOR CIKLUS");
+                    msg = client.FetchMessage(i);
+                    string subject = msg.Subject.Replace("(Aspose.Email Evaluation)", "").Trim();
+                    string body = msg.Body.Replace("------------------------------", "").Replace("(Aspose.Email", "").Replace("Evaluation)", "").Replace("This", "").Replace("is", "").Replace("an", "").Replace("evaluation", "").Replace("copy", "").Replace("of", "").Replace("Aspose.Email", "").Replace("for", "").Replace(".NET", "").Replace("http://www.aspose.com/corporate/purchase/end-user-license-agreement.aspx:", "").Replace("View", "").Replace("EULA", "").Replace("Online", "").Trim();
+
+                    if ((resolvedTickets.Find(ticket => ((ticket.email == msg.From.ToString()) && (ticket.problemSubject == subject) && (ticket.problemBody == body))) != null) || (unresolvedTickets.Find(ticket => ((ticket.email == msg.From.ToString()) && (ticket.problemSubject == subject) && (ticket.problemBody == body))) != null))
+                    {
+                        Debug.WriteLine("NE DODAVAM TIKET");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("DODAVAM TIKET");
+                        Ticket ticket = new Ticket();
+                        ticket.email = msg.From.ToString();
+                        ticket.submitTime = msg.Date.ToUniversalTime();
+                        ticket.problemSubject = subject;
+                        ticket.problemBody = body;
+                        db.Tickets.Add(ticket);
+                        db.SaveChanges();
+                    }
+                    Debug.WriteLine("Nova poraka " + msg.From.ToString() + " " + msg.Subject.Replace("(Aspose.Email Evaluation)", "").Trim() + " " + msg.Body.Replace("(Aspose.Email", "").Replace("Evaluation)", "").Replace("This", "").Replace("is", "").Replace("an", "").Replace("evaluation", "").Replace("copy", "").Replace("of", "").Replace("Aspose.Email", "").Replace("for", "").Replace(".NET", "").Replace("http://www.aspose.com/corporate/purchase/end-user-license-agreement.aspx:", "").Replace("View", "").Replace("EULA", "").Replace("Online", "").Trim());
+                }
+                /*msg.Save(dataDir + "first-message_out.eml", SaveOptions.DefaultEml);*/
+                client.Dispose();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(Environment.NewLine + ex.Message);
+            }
+            finally
+            {
+                client.Dispose();
+            }
+        }
 
         //site tiketi
         [Authorize]
@@ -180,60 +229,77 @@ namespace ticket_without_mail.Controllers
 
             List<ApplicationUser> users = applicationDbContext.Users.ToList();
             List<string> userMails = new List<string>();
+            if (soMail)
+                readMails();
 
-            if (id != -1)
-            {
-                Ticket ticket = db.Tickets.Find(id);
-                ticket.acceptanceTime = DateTime.UtcNow;
-                //ticket.acceptor = User.Identity.Name;
-                Debug.WriteLine(Request.Form["testtt"]);
-                Debug.WriteLine(id + " " + Request.Form["res"]);
-                ticket.acceptor = Request.Form["res"];
-                db.SaveChanges();
-                return RedirectToAction("SiteTiketi");
-            }
-            else
-            {
-                foreach (ApplicationUser applicationUser in users)
+                if (id != -1)
                 {
-                    userMails.Add(applicationUser.Email);
-                }
-                selektiranii.emails = userMails;
-
-                if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
-                {
-                    DateTime from = DateTime.Parse(Request.Form["from"]);
-                    DateTime to = DateTime.Parse(Request.Form["to"]);
-
-                    SiteModel siteModel = new SiteModel();
-
-                    siteModel.resolvedTickets = db.resolvedTickets.ToList();
-                    siteModel.unresolvedTickets = db.Tickets.ToList();
-
-                    foreach (Ticket ticket in siteModel.unresolvedTickets)
-                    {
-                        if (ticket.submitTime >= from && ticket.submitTime <= to)
-                        {
-                            Debug.WriteLine("DA");
-                            selektiranii.unresolvedTickets.Add(ticket);
-                        }
-                    }
-                    foreach (resolvedTickets ticket in siteModel.resolvedTickets)
-                    {
-                        if (ticket.submitTime >= from && ticket.submitTime <= to)
-                        {
-                            Debug.WriteLine("DA");
-                            selektiranii.resolvedTickets.Add(ticket);
-                        }
-                    }
-                    return View(selektiranii);
+                    Ticket ticket = db.Tickets.Find(id);
+                    ticket.acceptanceTime = DateTime.UtcNow;
+                    //ticket.acceptor = User.Identity.Name;
+                    Debug.WriteLine(Request.Form["testtt"]);
+                    Debug.WriteLine(id + " " + Request.Form["res"]);
+                    ticket.acceptor = Request.Form["res"];
+                    db.SaveChanges();
+                    return RedirectToAction("SiteTiketi");
                 }
                 else
                 {
-                    selektiranii.unresolvedTickets = db.Tickets.ToList();
-                    selektiranii.resolvedTickets = db.resolvedTickets.ToList();
-                    return View(selektiranii);
-                }
+                    //dodavanje na adminite
+                    foreach (ApplicationUser applicationUser in users)
+                    {
+                        userMails.Add(applicationUser.Email);
+                    }
+                    selektiranii.emails = userMails;
+
+                    //ako ima selektrirano datum od-do
+                    if (Request.Form["from"] != null && Request.Form["to"] != null && Request.Form["from"] != "" && Request.Form["to"] != "")
+                    {
+                        Debug.WriteLine("SO DATUM");
+
+                        //citanje na datumot koj e selektiran
+                        DateTime from = DateTime.Parse(Request.Form["from"]);
+                        DateTime to = DateTime.Parse(Request.Form["to"]);
+
+                        //pomosen model
+                        SiteModel siteModel = new SiteModel();
+
+                        //polnenje na pomosen model so podatoci od baza
+                        siteModel.resolvedTickets = db.resolvedTickets.ToList();
+                        siteModel.unresolvedTickets = db.Tickets.ToList();
+
+                        foreach (Ticket ticket in siteModel.unresolvedTickets)
+                        {
+                            if (ticket.submitTime >= from && ticket.submitTime <= to)
+                            {
+                                Debug.WriteLine("DA");
+                                selektiranii.unresolvedTickets.Add(ticket);
+                            }
+                        }
+                        foreach (resolvedTickets ticket in siteModel.resolvedTickets)
+                        {
+                            if (ticket.submitTime >= from && ticket.submitTime <= to)
+                            {
+                                Debug.WriteLine("DA");
+                                selektiranii.resolvedTickets.Add(ticket);
+                            }
+                        }
+                        return View(selektiranii);
+                    }
+                    //ako nema selektirano datum
+                    else
+                    {
+                        Debug.WriteLine("BEZ DATUM");
+
+                        if(soMail)
+                        readMails();
+
+                        //polnenje od baza
+                        selektiranii.unresolvedTickets = db.Tickets.ToList();
+                        selektiranii.resolvedTickets = db.resolvedTickets.ToList();
+
+                        return View(selektiranii);
+                    }
             }
         }
 
@@ -432,6 +498,7 @@ namespace ticket_without_mail.Controllers
                 }
             }
             db.Tickets.Remove(ticket);
+            sendMail(resolvedTickets.email, "Проблемот е решен", "Проблемот кој го имавте пратено е успешно решен.");
             db.resolvedTickets.Add(resolvedTickets);
             db.SaveChanges();
             return RedirectToAction("Index");
