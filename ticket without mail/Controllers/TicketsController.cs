@@ -23,14 +23,14 @@ namespace ticket_without_mail.Controllers
         //promenlivi valuti
         private static bool soMail = true;
 
-        private string POP3host = "outlook.office365.com";
-        private string username = "dushkomanev@outlook.com";
-        private string password = "Pandoraidule1!";
-        private int POP3port = 995;
+        private string POP3host = "outlook.office365.com"; //This should be changed outlook mail
+        private string username = "Your email"; //This should be changed
+        private string password = "Your password";//This should be changed
+        private int POP3port = 995;//This should be changed
 
-        private string smtpFrom = "dushkomanev@outlook.com";
-        private string SMTPhost = "smtp.office365.com";
-        private int SMTPport = 587;
+        private string smtpFrom = "Your email";//This should be changed
+        private string SMTPhost = "smtp.office365.com";//This should be changed
+        private int SMTPport = 587;//This should be changed
 
         //export na otvoreni tiketi
         [HttpPost]
